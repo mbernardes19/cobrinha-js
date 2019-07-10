@@ -85,9 +85,11 @@ botaoNao.addEventListener('click', () => {
         startX = touchobj.pageX
         startY = touchobj.pageY
         startTime = new Date().getTime() // record time when finger first makes contact with surface
+        e.preventDefault()
     }, false)
 
     touchsurface.addEventListener('touchmove', function(e){
+        e.preventDefault() // prevent scrolling when inside DIV
     }, false)
 
     touchsurface.addEventListener('touchend', function(e){
@@ -104,6 +106,7 @@ botaoNao.addEventListener('click', () => {
             }
         }
         handleswipe(swipedir)
+        e.preventDefault()
 
         if(swipedir === "up" && !movendoBaixo){
             dX = 0;
@@ -137,11 +140,15 @@ botaoNao.addEventListener('click', () => {
             movendoDir = false;
             movendoBaixo = false;
         }
+
     }, false)
     }
 
+    //USAGE:
+    
     var el = document.querySelector('canvas');
     swipedetect(el, function(swipedir){
+    // swipedir contains either "none", "left", "right", "top", or "down"
     });
 
 // ==================================
