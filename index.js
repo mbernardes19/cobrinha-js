@@ -140,7 +140,7 @@ botaoNao.addEventListener('click', () => {
     }, false)
     }
 
-    var el = document.querySelector('body');
+    var el = document.querySelector('canvas');
     swipedetect(el, function(swipedir){
     });
 
