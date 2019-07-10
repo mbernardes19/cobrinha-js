@@ -30,6 +30,7 @@ let comidaX = randomX - randomX % 20;
 let comidaY = randomY - randomY % 20;
 let pontuacao = 0;
 let velocidade = 200;
+let swipedir = 'none';
 // ===========================
 
 // ====== ELEMENTOS DO HTML
@@ -62,9 +63,92 @@ botaoNao.addEventListener('click', () => {
 
 // ========================
 
+// ====== IDENTIFICAR SWIPE NO TOUCH 
+    // credit: http://www.javascriptkit.com/javatutors/touchevents2.shtml
+    function swipedetect(el, callback){
+
+    var touchsurface = el,
+    startX,
+    startY,
+    distX,
+    distY,
+    threshold = 150, //required min distance traveled to be considered swipe
+    restraint = 100, // maximum distance allowed at the same time in perpendicular direction
+    allowedTime = 300, // maximum time allowed to travel that distance
+    elapsedTime,
+    startTime,
+    handleswipe = callback || function(swipedir){}
+
+    touchsurface.addEventListener('touchstart', function(e){
+        var touchobj = e.changedTouches[0]
+        dist = 0
+        startX = touchobj.pageX
+        startY = touchobj.pageY
+        startTime = new Date().getTime() // record time when finger first makes contact with surface
+    }, false)
+
+    touchsurface.addEventListener('touchmove', function(e){
+    }, false)
+
+    touchsurface.addEventListener('touchend', function(e){
+        var touchobj = e.changedTouches[0]
+        distX = touchobj.pageX - startX // get horizontal dist traveled by finger while in contact with surface
+        distY = touchobj.pageY - startY // get vertical dist traveled by finger while in contact with surface
+        elapsedTime = new Date().getTime() - startTime // get time elapsed
+        if (elapsedTime <= allowedTime){ // first condition for awipe met
+            if (Math.abs(distX) >= threshold && Math.abs(distY) <= restraint){ // 2nd condition for horizontal swipe met
+                swipedir = (distX < 0)? 'left' : 'right' // if dist traveled is negative, it indicates left swipe
+            }
+            else if (Math.abs(distY) >= threshold && Math.abs(distX) <= restraint){ // 2nd condition for vertical swipe met
+                swipedir = (distY < 0)? 'up' : 'down' // if dist traveled is negative, it indicates up swipe
+            }
+        }
+        handleswipe(swipedir)
+
+        if(swipedir === "up" && !movendoBaixo){
+            dX = 0;
+            dY = -20;
+            movendoCima = true;
+            movendoDir = false;
+            movendoEsq = false;
+            movendoBaixo = false;
+        }
+        if(swipedir === "down" && !movendoCima){
+            dX = 0;
+            dY = 20;
+            movendoCima = false;
+            movendoDir = false;
+            movendoEsq = false;
+            movendoBaixo = true;
+        }
+        if(swipedir === "right" && !movendoEsq){
+            dX = 20;
+            dY = 0;
+            movendoDir= true;
+            movendoCima = false;
+            movendoEsq = false;
+            movendoBaixo = false;
+        }
+        if(swipedir === "left" && !movendoDir){
+            dX = -20;
+            dY = 0;
+            movendoEsq= true;
+            movendoCima = false;
+            movendoDir = false;
+            movendoBaixo = false;
+        }
+    }, false)
+    }
+
+    var el = document.querySelector('body');
+    swipedetect(el, function(swipedir){
+    });
+
+// ==================================
+
 // ====== EVENT LISTENER PARA TECLAS
 window.addEventListener('keydown', (e) => {
-    if(e.code === "ArrowUp" && !movendoBaixo){
+    if(e.code === "ArrowUp" || swipedir === "up" && !movendoBaixo){
         dX = 0;
         dY = -20;
         movendoCima = true;
@@ -72,7 +156,7 @@ window.addEventListener('keydown', (e) => {
         movendoEsq = false;
         movendoBaixo = false;
     }
-    if(e.code === "ArrowDown" && !movendoCima){
+    if(e.code === "ArrowDown" || swipedir === "down" && !movendoCima){
         dX = 0;
         dY = 20;
         movendoCima = false;
@@ -80,7 +164,7 @@ window.addEventListener('keydown', (e) => {
         movendoEsq = false;
         movendoBaixo = true;
     }
-    if(e.code === "ArrowRight" && !movendoEsq){
+    if(e.code === "ArrowRight" || swipedir === "right" && !movendoEsq){
         dX = 20;
         dY = 0;
         movendoDir= true;
@@ -88,7 +172,7 @@ window.addEventListener('keydown', (e) => {
         movendoEsq = false;
         movendoBaixo = false;
     }
-    if(e.code === "ArrowLeft" && !movendoDir){
+    if(e.code === "ArrowLeft" || swipedir === "left" && !movendoDir){
         dX = -20;
         dY = 0;
         movendoEsq= true;
@@ -127,6 +211,7 @@ function gameLoop() {
             return;
         }
         mover();
+        console.log(swipedir);
         gerarComida();
     }
 }
